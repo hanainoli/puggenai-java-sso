@@ -1,0 +1,96 @@
+spring:
+  application:
+    name: auth-service
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pubsystem_db
+    username: pubsystem
+    password: pubsystem
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 1033285870540-vvkgn6opsgb00djmdc9mq4sn2jpb2krk.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+              - openid
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/auth
+  error:
+    include-message: always
+    include-stacktrace: on_param
+
+jwt:
+  private-key-path: classpath:keys/private_key.pem
+  public-key-path: classpath:keys/public_key.pem
+  expiration: 60000        # 15 min  in milliseconds
+  refresh-expiration: 300000  # 5 hours in milliseconds
+  issuer: pubsystem-auth
+
+cors:
+  allowed-origins: https://pubgenai.com,https://www.pubgenai.com,http://localhost:3000,http://localhost:5173 #https://pubgenai-git-main-nagaraju-cheelams-projects.vercel.app,https://pubgenai.com,http://localhost:3000,http://localhost:5173
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+  allowed-headers: "*"
+  allow-credentials: true
+
+app:
+  frontend-url: http://localhost:3000
+  api-service-url: http://localhost:8000
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.pubsystem.auth: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
